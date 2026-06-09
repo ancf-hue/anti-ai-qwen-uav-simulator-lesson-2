@@ -25,7 +25,6 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 .intro-title{ margin-top: 30px; font-size: 38px; font-weight: 900; background: linear-gradient(135deg,#ffffff,#00ccff,#ffaa33); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-align: center; letter-spacing: 3px; animation: titlePulse 2s ease-in-out infinite;}
 @keyframes titlePulse{ 0%, 100%{ opacity: 1; transform: scale(1);} 50%{ opacity: 0.9; transform: scale(1.02);}}
 .intro-subtitle{ margin-top: 10px; font-size: 18px; color:#ffaa33; text-align: center; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255, 170, 51, 0.8);}
-.intro-desc{ margin-top: 20px; max-width: 600px; text-align: center; color:#aaccff; font-size: 14px; line-height: 1.6; padding: 0 20px;}
 .start-btn{ margin-top: 30px; padding: 18px 60px; font-size: 20px; font-weight: bold; background: linear-gradient(145deg,#ff6600,#cc4400); border: none; border-radius: 50px; color: white; cursor: pointer; box-shadow: 0 8px 0 #882200, 0 15px 30px rgba(255, 102, 0, 0.6); transition: all 0.2s; text-transform: uppercase; letter-spacing: 2px;}
 .start-btn:hover{ transform: translateY(-3px); box-shadow: 0 11px 0 #882200, 0 20px 40px rgba(255, 102, 0, 0.8);}
 .start-btn:active{ transform: translateY(5px); box-shadow: 0 3px 0 #882200, 0 8px 15px rgba(255, 102, 0, 0.6);}
@@ -307,7 +306,7 @@ function ensureAudio(){
   return true;
 }
 
-// ✅ ОПТИМИЗИРОВАННАЯ ФУНКЦИЯ ЗВУКА (с очисткой памяти)
+// ✅ ИСПРАВЛЕНИЕ №2: Очистка аудио-памяти через disconnect()
 function playSound(freq, duration, type = 'square', volume = 0.08){
   if(!ensureAudio()) return;
   try{
@@ -361,13 +360,13 @@ const SFX = {
   }
 };
 
-// ✅ ОПТИМИЗИРОВАННЫЕ УВЕДОМЛЕНИЯ (защита от спама)
+// ✅ ИСПРАВЛЕНИЕ №3: Защита от спама уведомлений
 let notifTimeout = null;
 let lastNotifText = "";
 
 function showNotification(text, type = ''){
   const n = document.getElementById('notification');
-  if (!n || lastNotifText === text) return;
+  if (!n || lastNotifText === text) return; // ✅ Блокировка дубликатов
   
   lastNotifText = text;
   n.innerText = text;
@@ -918,7 +917,6 @@ function handleMovement(){
     prop.rotation.y += (Math.abs(state.carSpeed) + 0.1) * 0.8;
   });
 
-  // ✅ ОПТИМИЗИРОВАННОЕ ОБНОВЛЕНИЕ UI (throttle)
   const now = Date.now();
   if(now - state.lastUIUpdate > CONFIG.UI_UPDATE_INTERVAL){
     state.lastUIUpdate = now;
@@ -929,12 +927,16 @@ function handleMovement(){
   if(Math.abs(state.carSpeed) > 0.05) SFX.engine();
 }
 
-// ✅ ОПТИМИЗИРОВАННАЯ ПРОВЕРКА ЧЕКПОИНТОВ
+// ✅ ИСПРАВЛЕНИЕ №1: Блокировка спама коллизий
 function checkCheckpoints(){
   if(state.isCrashed || state.gameCompleted) return;
   const currentCP = checkpoints[state.currentCheckpoint];
   
-  if (currentCP && !currentCP.passed && currentCP.checkCollision(carGroup.position)){
+  // ✅ Мгновенный выход, если чекпоинт уже пройден
+  if (currentCP && currentCP.passed) return;
+  
+  if (currentCP && currentCP.checkCollision(carGroup.position)){
+    // Мгновенно блокируем повторные срабатывания
     currentCP.passed = true; 
     currentCP.active = false; 
     currentCP.group.visible = false;
@@ -942,6 +944,7 @@ function checkCheckpoints(){
     state.checkpointsPassed++;
     state.currentCheckpoint++;
     
+    // Переносим тяжёлое обновление в следующий кадр
     requestAnimationFrame(() => {
       document.getElementById('checkpoints').innerText = state.checkpointsPassed;
       document.getElementById('checkpoint-counter').innerText = state.checkpointsPassed;
