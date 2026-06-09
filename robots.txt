@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Ссылка на вашу карту сайта (замените дату в sitemap, если нужно)
+Sitemap: https://vercel.app
