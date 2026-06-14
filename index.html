@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
-<title>Урок 2: Навигация | Оператор «Автомобиль» — Qwen</title>
+<title>Урок 2: Навигация | Оператор БПЛА «Автомобиль» — Qwen</title>
 <style>
 *{ box-sizing: border-box; margin: 0; padding: 0;}
 body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background:#050b1a; color:#ccffcc;}
@@ -25,9 +25,18 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 .intro-title{ margin-top: 30px; font-size: 38px; font-weight: 900; background: linear-gradient(135deg,#ffffff,#00ccff,#ffaa33); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-align: center; letter-spacing: 3px; animation: titlePulse 2s ease-in-out infinite;}
 @keyframes titlePulse{ 0%, 100%{ opacity: 1; transform: scale(1);} 50%{ opacity: 0.9; transform: scale(1.02);}}
 .intro-subtitle{ margin-top: 10px; font-size: 18px; color:#ffaa33; text-align: center; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255, 170, 51, 0.8);}
-.start-btn{ margin-top: 30px; padding: 18px 60px; font-size: 20px; font-weight: bold; background: linear-gradient(145deg,#ff6600,#cc4400); border: none; border-radius: 50px; color: white; cursor: pointer; box-shadow: 0 8px 0 #882200, 0 15px 30px rgba(255, 102, 0, 0.6); transition: all 0.2s; text-transform: uppercase; letter-spacing: 2px;}
-.start-btn:hover{ transform: translateY(-3px); box-shadow: 0 11px 0 #882200, 0 20px 40px rgba(255, 102, 0, 0.8);}
-.start-btn:active{ transform: translateY(5px); box-shadow: 0 3px 0 #882200, 0 8px 15px rgba(255, 102, 0, 0.6);}
+
+.level-selector{ margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 900px;}
+.level-card{ flex: 1; min-width: 220px; max-width: 280px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-radius: 20px; padding: 25px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent; position: relative; overflow: hidden;}
+.level-card::before{ content:''; position: absolute; inset: 0; background: radial-gradient(circle at center, var(--level-color-alpha), transparent 70%); opacity: 0.3; transition: opacity 0.3s;}
+.level-card:hover{ transform: translateY(-5px) scale(1.03); box-shadow: 0 10px 40px var(--level-color-alpha);}
+.level-card:hover::before{ opacity: 0.6;}
+.level-card.easy{ --level-color: #48bb78; --level-color-alpha: rgba(72, 187, 120, 0.4); border-color: #48bb78;}
+.level-card.medium{ --level-color: #ecc94b; --level-color-alpha: rgba(236, 201, 75, 0.4); border-color: #ecc94b;}
+.level-card.hard{ --level-color: #e53e3e; --level-color-alpha: rgba(229, 62, 62, 0.4); border-color: #e53e3e;}
+.level-name{ font-size: 22px; font-weight: 900; color: var(--level-color); margin-bottom: 12px; text-shadow: 0 0 15px var(--level-color-alpha); letter-spacing: 2px;}
+.level-stars{ font-size: 28px; color: var(--level-color); text-shadow: 0 0 15px var(--level-color); margin-bottom: 15px; letter-spacing: 5px;}
+.level-desc{ font-size: 13px; color: #aaccff; line-height: 1.8;}
 
 #simulator-page{ position: fixed; inset: 0; opacity: 0; pointer-events: none; transition: opacity 1s ease; background: radial-gradient(ellipse at top,#0a1a3a 0%,#050a1f 50%, #000005 100%);}
 #simulator-page.active{ opacity: 1; pointer-events: all;}
@@ -48,19 +57,17 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 
 .lesson-badge{ position: fixed; bottom: 20px; right: 20px; background:#000000aa; padding: 5px 12px; border-radius: 20px; font-size: 11px; color:#88ff88; pointer-events: none; font-family: monospace; z-index: 100;}
 
-#resetCarBtn, #exitMenuBtn{ position: fixed; bottom: 130px; z-index: 9999; background: linear-gradient(145deg,#ff6600,#cc4400); border: none; padding: 10px 30px; border-radius: 40px; font-weight: bold; font-family: monospace; cursor: pointer; box-shadow: 0 4px 0 #882200, 0 6px 15px rgba(255,102,0,0.6); transition: 0.1s; font-size: 14px; color: white;}
-#resetCarBtn{ left: calc(50% - 160px); transform: translateX(0);}
-#exitMenuBtn{ left: calc(50% + 10px); transform: translateX(0); background: linear-gradient(145deg,#cc3333,#882222); box-shadow: 0 4px 0 #551111, 0 6px 15px rgba(200,50,50,0.6);}
-#resetCarBtn:hover, #exitMenuBtn:hover{ transform: translateY(-1px);}
-#resetCarBtn:active, #exitMenuBtn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #882200;}
+#resetCarBtn{ position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); z-index: 200; background: linear-gradient(145deg,#ff6600,#cc4400); border: none; padding: 10px 30px; border-radius: 40px; font-weight: bold; font-family: monospace; cursor: pointer; box-shadow: 0 4px 0 #882200, 0 6px 15px rgba(255,102,0,0.6); transition: 0.1s; font-size: 14px; color: white;}
+#resetCarBtn:hover{ background: linear-gradient(145deg,#ffaa33,#ee7711); transform: translateX(-50%) translateY(-1px);}
+#resetCarBtn:active{ transform: translateX(-50%) translateY(3px); box-shadow: 0 1px 0 #882200;}
 
-#notification{ position: fixed; top: 140px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#00ccff,#0066ff); color: white; padding: 12px 28px; border-radius: 30px; font-weight: bold; font-family: monospace; z-index: 9999; opacity: 0; transition: opacity 0.3s, top 0.3s; box-shadow: 0 8px 25px rgba(0, 200, 255, 0.5); white-space: nowrap; font-size: 14px; pointer-events: none;}
+#notification{ position: fixed; top: 140px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#00ccff,#0066ff); color: white; padding: 12px 28px; border-radius: 30px; font-weight: bold; font-family: monospace; z-index: 250; opacity: 0; transition: opacity 0.3s, top 0.3s; box-shadow: 0 8px 25px rgba(0, 200, 255, 0.5); white-space: nowrap; font-size: 14px; pointer-events: none;}
 #notification.show{ opacity: 1; top: 160px;}
 #notification.success{ background: linear-gradient(135deg,#55ff55,#22aa22); box-shadow: 0 8px 25px rgba(85, 255, 85, 0.5);}
 #notification.hit{ background: linear-gradient(135deg,#ff6600,#ff3300); box-shadow: 0 8px 25px rgba(255, 102, 0, 0.5);}
 #notification.info{ background: linear-gradient(135deg,#8888ff,#5555cc); box-shadow: 0 8px 25px rgba(136, 136, 255, 0.5);}
 
-.victory-modal{ position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.5s ease;}
+.victory-modal{ position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.5s ease;}
 .victory-modal.show{ opacity: 1; visibility: visible;}
 .victory-content{ background: linear-gradient(135deg,#1a2a4a,#0a1a3a); border-radius: 30px; padding: 50px; text-align: center; border: 2px solid #ffaa33; box-shadow: 0 0 80px rgba(255, 170, 51, 0.5); animation: victoryGlow 1s ease-in-out infinite; max-width: 500px; margin: 20px;}
 @keyframes victoryGlow{ 0%, 100%{ box-shadow: 0 0 40px rgba(255, 170, 51, 0.3);} 50%{ box-shadow: 0 0 80px rgba(255, 170, 51, 0.8);}}
@@ -68,11 +75,11 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 .victory-content p{ font-size: 18px; color:#ccffcc; margin: 20px 0; line-height: 1.6;}
 .victory-stats{ background: rgba(0, 0, 0, 0.5); border-radius: 20px; padding: 20px; margin: 20px 0; font-size: 20px;}
 .victory-stats span{ color:#ffaa33; font-size: 32px; font-weight: bold;}
-.restart-game-btn, .exit-game-btn{ border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; color: white; cursor: pointer; margin: 10px; transition: 0.2s;}
-.restart-game-btn{ background: linear-gradient(145deg,#ff6600,#cc4400); box-shadow: 0 5px 0 #882200;}
-.exit-game-btn{ background: linear-gradient(145deg,#cc3333,#882222); box-shadow: 0 5px 0 #551111;}
-.restart-game-btn:hover, .exit-game-btn:hover{ transform: translateY(-2px);}
-.restart-game-btn:active, .exit-game-btn:active{ transform: translateY(3px);}
+.modal-btn-row{ display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;}
+.restart-game-btn, .menu-game-btn{ background: linear-gradient(145deg,#ff6600,#cc4400); border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 0 #882200;}
+.menu-game-btn{ background: linear-gradient(145deg,#4a5568,#2d3748); box-shadow: 0 5px 0 #1a202c;}
+.restart-game-btn:hover, .menu-game-btn:hover{ transform: translateY(-2px);}
+.restart-game-btn:active, .menu-game-btn:active{ transform: translateY(3px);}
 
 .support-container{ position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 50; max-width: 600px; width: 90%; pointer-events: auto;}
 .support-block{ background: linear-gradient(135deg, rgba(30, 60, 120, 0.3), rgba(10, 25, 60, 0.5)); backdrop-filter: blur(15px); border-radius: 20px; padding: 10px 16px; border: 1px solid rgba(100, 150, 255, 0.3); text-align: center; font-size: 11px; color:#aaccff;}
@@ -83,7 +90,7 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 .copy-btn{ background: linear-gradient(145deg,#4a8fff,#2266cc); color: white; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; border: none; cursor: pointer;}
 .copy-btn.copied{ background: linear-gradient(145deg,#55ff55,#22aa22)!important;}
 
-#webgl-error{ display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); color:#ff5555; z-index: 99999; padding: 40px; font-family: monospace; font-size: 18px; text-align: center; align-items: center; justify-content: center; flex-direction: column;}
+#webgl-error{ display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); color:#ff5555; z-index: 9999; padding: 40px; font-family: monospace; font-size: 18px; text-align: center; align-items: center; justify-content: center; flex-direction: column;}
 #webgl-error.show{ display: flex;}
 #webgl-error h2{ font-size: 28px; margin-bottom: 20px; color:#ff8888;}
 #webgl-error p{ max-width: 600px; line-height: 1.6; color:#ffcccc;}
@@ -96,30 +103,57 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
  .logo-sub{ font-size: 9px;}
  .intro-title{ font-size: 26px;}
  .intro-subtitle{ font-size: 14px;}
- .start-btn{ padding: 14px 40px; font-size: 16px;}
+ .level-card{ min-width: 160px; padding: 18px 12px;}
+ .level-name{ font-size: 16px;}
+ .level-stars{ font-size: 22px;}
+ .level-desc{ font-size: 11px;}
  .victory-content{ padding: 30px;}
  .victory-content h2{ font-size: 32px;}
- #resetCarBtn, #exitMenuBtn{ bottom: 100px; padding: 8px 20px; font-size: 12px;}
- #resetCarBtn{ left: calc(50% - 120px);}
- #exitMenuBtn{ left: calc(50% + 10px);}
+ .restart-game-btn, .menu-game-btn{ padding: 12px 24px; font-size: 14px;}
 }
 </style>
 </head>
 <body>
 
 <div class="logo-header">
-  <img id="logoImg" src="favicon.ico" alt="Авто">
+  <img id="logoImg" src="favicon.ico" alt="БПЛА">
   <div class="logo-text">
     <div class="logo-main">Qwen | Урок 2: Навигация</div>
-    <div class="logo-sub">ОПЕРАТОР «АВТОМОБИЛЬ»</div>
+    <div class="logo-sub">ОПЕРАТОР БПЛА «АВТОМОБИЛЬ»</div>
   </div>
 </div>
 
 <div id="intro-page">
-  <img src="uav-operator.jpg" alt="Оператор Автомобиля" class="intro-image">
-  <h1 class="intro-title">ОПЕРАТОР АВТОМОБИЛЬ</h1>
+  <img src="uav-operator.jpg" alt="Оператор БПЛА Автомобиль" class="intro-image">
+  <h1 class="intro-title">ОПЕРАТОР БПЛА АВТОМОБИЛЬ</h1>
   <div class="intro-subtitle">Qwen · БПЛА ТРЕНАЖЁР · УРОК 2</div>
-  <button class="start-btn" id="startBtn">НАЧАТЬ ОБУЧЕНИЕ</button>
+  
+  <div class="level-selector">
+    <div class="level-card easy" data-level="easy">
+      <div class="level-name">ЛЁГКИЙ</div>
+      <div class="level-stars">⭐</div>
+      <div class="level-desc">
+        3 чекпоинта · 120 сек<br>
+        Мало препятствий
+      </div>
+    </div>
+    <div class="level-card medium" data-level="medium">
+      <div class="level-name">СРЕДНИЙ</div>
+      <div class="level-stars">⭐⭐</div>
+      <div class="level-desc">
+        5 чекпоинтов · 90 сек<br>
+        Препятствия
+      </div>
+    </div>
+    <div class="level-card hard" data-level="hard">
+      <div class="level-name">СЛОЖНЫЙ</div>
+      <div class="level-stars">⭐⭐⭐</div>
+      <div class="level-desc">
+        7 чекпоинтов · 60 сек<br>
+        Много препятствий
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="simulator-page">
@@ -145,7 +179,7 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 
   <div id="checkpoint-panel">
     ПРОЛЕТЕТЬ ЧЕКПОИНТЫ 🏁<br>
-    <span id="checkpoint-counter">0</span> / 5<br>
+    <span id="checkpoint-counter">0</span> / <span id="checkpoint-total">5</span><br>
     <span style="font-size:11px;">Следуйте стрелкам 🎯</span>
   </div>
 
@@ -157,9 +191,8 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
     Избегайте препятствий! ⚠️
   </div>
 
-  <div class="lesson-badge">ЗАДАНИЕ: Проехать через 5 чекпоинтов 📡</div>
-  <button id="resetCarBtn">🔄 Перезапустить</button>
-  <button id="exitMenuBtn">🚪 Выйти в меню</button>
+  <div class="lesson-badge">ЗАДАНИЕ: Проехать через все чекпоинты 📡</div>
+  <button id="resetCarBtn">🔄 Перезапустить упражнение</button>
 
   <div class="support-container">
     <div class="support-block">
@@ -178,12 +211,14 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
     <h2>🏆 ПОБЕДА! 🏆</h2>
     <p>Отличная работа, оператор!<br>Все чекпоинты пройдены!</p>
     <div class="victory-stats">
-      Пройдено: <span id="victoryCheckpoints">5</span>/5 🏁<br>
+      Пройдено: <span id="victoryCheckpoints">5</span>/<span id="victoryTotal">5</span> 🏁<br>
       Макс. скорость: <span id="victorySpeed">0</span> км/ч 🚗
     </div>
     <p>Вы успешно завершили Урок 2: Навигация!</p>
-    <button class="restart-game-btn" id="fullRestartBtn">🔄 НАЧАТЬ ЗАНОВО</button>
-    <button class="exit-game-btn" id="exitToMenuBtn">🚪 В МЕНЮ</button>
+    <div class="modal-btn-row">
+      <button class="restart-game-btn" id="fullRestartBtn">🔄 ПОВТОРИТЬ</button>
+      <button class="menu-game-btn" id="victoryMenuBtn">📋 В МЕНЮ</button>
+    </div>
   </div>
 </div>
 
@@ -193,11 +228,39 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+const LEVELS = {
+  easy: {
+    name: 'ЛЁГКИЙ',
+    color: '#48bb78',
+    checkpointCount: 3,
+    missionTime: 120,
+    carMaxSpeed: 0.25,
+    carAcceleration: 0.012,
+    obstacleCount: 6
+  },
+  medium: {
+    name: 'СРЕДНИЙ',
+    color: '#ecc94b',
+    checkpointCount: 5,
+    missionTime: 90,
+    carMaxSpeed: 0.35,
+    carAcceleration: 0.015,
+    obstacleCount: 10
+  },
+  hard: {
+    name: 'СЛОЖНЫЙ',
+    color: '#e53e3e',
+    checkpointCount: 7,
+    missionTime: 60,
+    carMaxSpeed: 0.45,
+    carAcceleration: 0.018,
+    obstacleCount: 14
+  }
+};
+
 const CONFIG = {
-  CAR_ACCELERATION: 0.015,
   CAR_BRAKE: 0.025,
   CAR_REVERSE: 0.01,
-  CAR_MAX_SPEED: 0.35,
   CAR_FRICTION: 0.97,
   CAR_TURN_SPEED: 0.04,
   COLLISION_FORCE_THRESHOLD: 0.05,
@@ -208,12 +271,10 @@ const CONFIG = {
   MIN_Z: -14,
   GROUND_Y: 0,
   BOUNCE_FACTOR: -0.6,
-  CHECKPOINT_COUNT: 5,
   CAMERA_OFFSET: { x: 0, y: 4, z: -8 },
   CAMERA_LERP: 0.09,
   LOW_END_CORES: 4,
   MAX_PIXEL_RATIO: 2,
-  MISSION_TIME: 90,
   DRONE_RADIUS: 0.6,
   OBSTACLE_RADIUS: 0.8,
   ENGINE_SOUND_INTERVAL: 150,
@@ -232,11 +293,12 @@ const state = {
   simulatorInitialized: false,
   gameCompleted: false,
   battery: 100,
-  timeLeft: CONFIG.MISSION_TIME,
+  timeLeft: 90,
   timerInterval: null,
   propAngle: 0,
   lastEngineSound: 0,
-  lastUIUpdate: 0
+  lastUIUpdate: 0,
+  currentLevel: 'medium'
 };
 
 let scene, camera, renderer, carGroup;
@@ -289,8 +351,24 @@ function showCopySuccess(btn){
 }
 document.getElementById('copyPhoneBtn').addEventListener('click', copyPhone);
 
-document.getElementById('startBtn').addEventListener('click', startSimulator);
-function startSimulator(){
+document.querySelectorAll('.level-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const level = card.dataset.level;
+    startSimulator(level);
+  });
+});
+
+function startSimulator(level){
+  state.currentLevel = level;
+  const levelConfig = LEVELS[level];
+  
+  CONFIG.CAR_MAX_SPEED = levelConfig.carMaxSpeed;
+  CONFIG.CAR_ACCELERATION = levelConfig.carAcceleration;
+  CONFIG.MISSION_TIME = levelConfig.missionTime;
+  CONFIG.CHECKPOINT_COUNT = levelConfig.checkpointCount;
+  
+  document.getElementById('checkpoint-total').innerText = CONFIG.CHECKPOINT_COUNT;
+  
   const music = document.getElementById('bg-music');
   music.volume = 0.4;
   music.play().catch(e => console.log('Автовоспроизведение музыки заблокировано:', e.message));
@@ -298,25 +376,16 @@ function startSimulator(){
   document.getElementById('intro-page').classList.add('hidden');
   setTimeout(() => {
     document.getElementById('simulator-page').classList.add('active');
-    if(!state.simulatorInitialized){ initSimulator(); }
-    else { fullGameRestart(); }
+    if(!state.simulatorInitialized){ 
+      initSimulator(); 
+    } else {
+      resetLevel();
+      if(!state.animationId){
+        animate();
+      }
+    }
     startMissionTimer();
   }, 800);
-}
-
-function exitToMenu(){
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
-  document.getElementById('victoryModal').classList.remove('show');
-  document.getElementById('simulator-page').classList.remove('active');
-  setTimeout(() => {
-    document.getElementById('intro-page').classList.remove('hidden');
-  }, 300);
-  const music = document.getElementById('bg-music');
-  music.pause();
-  music.currentTime = 0;
 }
 
 let audioCtx = null;
@@ -351,8 +420,8 @@ function playSound(freq, duration, type = 'square', volume = 0.08){
     osc.stop(now + duration);
 
     setTimeout(() => {
-      try { osc.disconnect(); } catch(e){}
-      try { gain.disconnect(); } catch(e){}
+      osc.disconnect();
+      gain.disconnect();
     }, (duration * 1000) + 50);
 
   } catch(e){}
@@ -402,11 +471,7 @@ function showNotification(text, type = ''){
 }
 
 function startMissionTimer(){
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
-  
+  if(state.timerInterval) clearInterval(state.timerInterval);
   state.timeLeft = CONFIG.MISSION_TIME;
   state.battery = 100;
   document.getElementById('timer-ui').innerText = state.timeLeft;
@@ -433,28 +498,54 @@ function triggerFail(message){
   state.carSpeed = 0;
   showNotification(message, 'hit');
   if(typeof SFX !== 'undefined' && SFX.crash) SFX.crash();
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval = null; }
 }
 
 function showVictoryModal(){
   if(state.gameCompleted) return;
   state.gameCompleted = true;
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval = null; }
+  
+  // Останавливаем музыку
+  const music = document.getElementById('bg-music');
+  music.pause();
+  
+  // Останавливаем анимацию
+  if(state.animationId){
+    cancelAnimationFrame(state.animationId);
+    state.animationId = null;
   }
+  
   document.getElementById('victoryCheckpoints').innerText = state.checkpointsPassed;
+  document.getElementById('victoryTotal').innerText = CONFIG.CHECKPOINT_COUNT;
   document.getElementById('victorySpeed').innerText = Math.round(state.maxSpeed * 200);
   document.getElementById('victoryModal').classList.add('show');
   SFX.victory();
   showNotification("✅ УРОК 2 ПРОЙДЕН! Отличная работа, оператор!", 'success');
 }
 
-function fullGameRestart(){
+function returnToMenu(){
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval = null; }
+  if(state.animationId){
+    cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
+  
+  // Останавливаем музыку
+  const music = document.getElementById('bg-music');
+  music.pause();
+  music.currentTime = 0;
+  
   document.getElementById('victoryModal').classList.remove('show');
+  document.getElementById('simulator-page').classList.remove('active');
+  
+  setTimeout(() => {
+    document.getElementById('intro-page').classList.remove('hidden');
+    resetLevel();
+  }, 500);
+}
+
+function resetLevel(){
   state.gameCompleted = false;
   state.checkpointsPassed = 0;
   state.currentCheckpoint = 0;
@@ -462,6 +553,7 @@ function fullGameRestart(){
   state.carSpeed = 0;
   state.maxSpeed = 0;
   state.carRotation = 0;
+  state.animationId = null;
   document.getElementById('checkpoints').innerText = '0';
   document.getElementById('checkpoint-counter').innerText = '0';
   document.getElementById('speed').innerText = '0';
@@ -469,20 +561,21 @@ function fullGameRestart(){
     carGroup.position.set(0, CONFIG.GROUND_Y, 0);
     carGroup.rotation.y = 0;
   }
-  
-  // ✅ ФИКС: Жёсткий сброс всех чекпоинтов
-  checkpoints.forEach(cp => {
-    cp.passed = false;
-    cp.active = true;
-    cp.group.visible = true;
-    cp.group.position.copy(cp.position);
-  });
-  
+  for(let c of checkpoints){ if(c && typeof c.reset === 'function') c.reset(); }
   smokeParticles = [];
+}
+
+function fullGameRestart(){
+  document.getElementById('victoryModal').classList.remove('show');
+  resetLevel();
   
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
+  // Запускаем музыку заново
+  const music = document.getElementById('bg-music');
+  music.currentTime = 0;
+  music.play().catch(() => {});
+  
+  if(!state.animationId){
+    animate();
   }
   startMissionTimer();
   showNotification("🔄 Игра перезапущена! Удачи, оператор!", 'success');
@@ -490,34 +583,7 @@ function fullGameRestart(){
 
 function resetExercise(){
   if(state.gameCompleted){ fullGameRestart(); return; }
-  state.checkpointsPassed = 0;
-  state.currentCheckpoint = 0;
-  state.isCrashed = false;
-  state.carSpeed = 0;
-  state.maxSpeed = 0;
-  state.carRotation = 0;
-  document.getElementById('checkpoints').innerText = '0';
-  document.getElementById('checkpoint-counter').innerText = '0';
-  document.getElementById('speed').innerText = '0';
-  
-  // ✅ ФИКС: Жёсткий сброс всех чекпоинтов
-  checkpoints.forEach(cp => {
-    cp.passed = false;
-    cp.active = true;
-    cp.group.visible = true;
-    cp.group.position.copy(cp.position);
-  });
-  
-  if(carGroup){
-    carGroup.position.set(0, CONFIG.GROUND_Y, 0);
-    carGroup.rotation.y = 0;
-  }
-  smokeParticles = [];
-  
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
+  resetLevel();
   startMissionTimer();
   showNotification("🔄 Упражнение перезапущено", 'success');
 }
@@ -654,6 +720,9 @@ function setupWalls(){
 
 function setupObstacles(){
   obstacles = [];
+  const levelConfig = LEVELS[state.currentLevel];
+  const count = levelConfig.obstacleCount;
+  
   const obstacleMat = new THREE.MeshStandardMaterial({
     color: 0xff3300, emissive: 0x661100, emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.6
   });
@@ -661,7 +730,7 @@ function setupObstacles(){
     color: 0xffaa00, emissive: 0xff6600, emissiveIntensity: 0.6, roughness: 0.3, metalness: 0.7
   });
 
-  const obstacleConfigs = [
+  const baseObstacles = [
     { type: 'cylinder', x: -5, z: 3, radius: 0.8, height: 3 },
     { type: 'cylinder', x: 5, z: 3, radius: 0.8, height: 3 },
     { type: 'cylinder', x: -5, z: -5, radius: 0.8, height: 3 },
@@ -674,7 +743,26 @@ function setupObstacles(){
     { type: 'box', x: 0, z: -5, w: 0.5, h: 2, d: 4 }
   ];
 
-  obstacleConfigs.forEach((cfg, idx) => {
+  const selectedObstacles = baseObstacles.slice(0, Math.min(count, baseObstacles.length));
+  
+  for(let i = baseObstacles.length; i < count; i++){
+    const angle = (i / count) * Math.PI * 2;
+    const radius = 6 + Math.random() * 4;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    selectedObstacles.push({
+      type: i % 2 === 0 ? 'cylinder' : 'box',
+      x: x,
+      z: z,
+      radius: 0.8,
+      height: 3,
+      w: 2,
+      h: 2,
+      d: 2
+    });
+  }
+
+  selectedObstacles.forEach((cfg, idx) => {
     const mat = idx % 2 === 0 ? obstacleMat : warningMat;
     let mesh;
     let radius = CONFIG.OBSTACLE_RADIUS;
@@ -860,9 +948,7 @@ function setupCheckpoints(){
       return true;
     }
     reset(){
-      this.active = true; 
-      this.passed = false;  // ✅ СБРОС ФЛАГА
-      this.group.visible = true;
+      this.active = true; this.passed = false; this.group.visible = true;
       this.group.position.copy(this.position);
     }
     checkCollision(carPos){
@@ -871,9 +957,13 @@ function setupCheckpoints(){
     }
   }
 
-  const positions = [
-    { x: 0, z: 8 }, { x: 8, z: 8 }, { x: 10, z: -8 }, { x: -10, z: -8 }, { x: -8, z: 8 }
+  const allPositions = [
+    { x: 0, z: 8 }, { x: 8, z: 8 }, { x: 10, z: -8 }, { x: -10, z: -8 }, 
+    { x: -8, z: 8 }, { x: 6, z: -6 }, { x: -6, z: -6 }
   ];
+  
+  const positions = allPositions.slice(0, CONFIG.CHECKPOINT_COUNT);
+  
   for(let i = 0; i < CONFIG.CHECKPOINT_COUNT; i++){
     const pos = positions[i];
     checkpoints.push(new Checkpoint(scene, pos.x, pos.z, i));
@@ -987,17 +1077,11 @@ function handleMovement(){
   if(Math.abs(state.carSpeed) > 0.05) SFX.engine();
 }
 
-// ✅ ФИНАЛЬНАЯ ОПТИМИЗАЦИЯ: Жёсткая блокировка повторных вызовов
 function checkCheckpoints(){
   if(state.isCrashed || state.gameCompleted) return;
-  
   const currentCP = checkpoints[state.currentCheckpoint];
   
-  // ✅ КРИТИЧЕСКИЙ ФИКС: Мгновенный выход, если ворота уже пройдены
-  if (!currentCP || currentCP.passed) return;
-  
-  if (currentCP.checkCollision(carGroup.position)){
-    // ✅ МГНОВЕННО блокируем повторные срабатывания
+  if (currentCP && !currentCP.passed && currentCP.checkCollision(carGroup.position)){
     currentCP.passed = true; 
     currentCP.active = false; 
     currentCP.group.visible = false;
@@ -1005,14 +1089,12 @@ function checkCheckpoints(){
     state.checkpointsPassed++;
     state.currentCheckpoint++;
     
-    // ✅ Разгружаем поток рендеринга
     requestAnimationFrame(() => {
       document.getElementById('checkpoints').innerText = state.checkpointsPassed;
       document.getElementById('checkpoint-counter').innerText = state.checkpointsPassed;
       showNotification(`🏁 ЧЕКПОИНТ ${state.checkpointsPassed}/${CONFIG.CHECKPOINT_COUNT}!`, 'success');
     });
 
-    // ✅ Звук срабатывает строго 1 раз
     if(typeof SFX !== 'undefined' && SFX.checkpoint) SFX.checkpoint();
     
     if(state.checkpointsPassed === CONFIG.CHECKPOINT_COUNT){
@@ -1068,16 +1150,17 @@ function updateSmokeEffect(){
 }
 
 function animate(time){
-  state.animationId = requestAnimationFrame(animate);
-  
-  if(!state.isCrashed && !state.gameCompleted){
-    handleMovement();
-    checkpoints.forEach(c => { if(c.active) c.update(); });
-    checkCheckpoints();
-    updateSmokeEffect();
+  if(state.gameCompleted || state.isCrashed){
+    state.animationId = null;
+    return;
   }
   
+  state.animationId = requestAnimationFrame(animate);
+  handleMovement();
+  checkpoints.forEach(c => { if(c.active) c.update(); });
+  checkCheckpoints();
   updateCamera();
+  updateSmokeEffect();
 
   if(gridHelper && gridHelper.material){
     gridHelper.material.opacity = 0.5 + Math.sin((time || 0) * 0.002) * 0.15;
@@ -1098,19 +1181,19 @@ function setupEventListeners(){
   window.addEventListener('resize', handleResize);
   document.getElementById('resetCarBtn').addEventListener('click', resetExercise);
   document.getElementById('fullRestartBtn').addEventListener('click', fullGameRestart);
-  document.getElementById('exitMenuBtn').addEventListener('click', exitToMenu);
-  document.getElementById('exitToMenuBtn').addEventListener('click', exitToMenu);
+  document.getElementById('victoryMenuBtn').addEventListener('click', returnToMenu);
 }
 
 window.addEventListener('beforeunload', () => {
   if(state.animationId) cancelAnimationFrame(state.animationId);
-  if(state.timerInterval){
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
+  if(state.timerInterval) clearInterval(state.timerInterval);
   window.removeEventListener('keydown', handleKeyDown);
   window.removeEventListener('keyup', handleKeyUp);
   window.removeEventListener('resize', handleResize);
+  
+  const music = document.getElementById('bg-music');
+  if(music) { music.pause(); music.currentTime = 0; }
+  
   if(audioCtx && audioCtx.state !== 'closed'){
     try{ audioCtx.close(); } catch(e){}
   }
