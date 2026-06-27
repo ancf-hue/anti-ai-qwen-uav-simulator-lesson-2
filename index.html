@@ -228,18 +228,6 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Проверка загрузки Three.js
-if (typeof THREE === 'undefined') {
-  console.error('❌ Three.js не загружен! Проверьте подключение к интернету.');
-  window.addEventListener('DOMContentLoaded', () => {
-    const errorDiv = document.getElementById('webgl-error');
-    if (errorDiv) {
-      errorDiv.innerHTML = '<h2>Ошибка загрузки</h2><p>Не удалось загрузить Three.js. Проверьте подключение к интернету и обновите страницу.</p>';
-      errorDiv.classList.add('show');
-    }
-  });
-}
-
 const LEVELS = {
   easy: {
     name: 'ЛЁГКИЙ',
@@ -376,11 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function startSimulator(level){
-  if (typeof THREE === 'undefined') {
-    showNotification('❌ Three.js не загружен! Проверьте интернет.', 'hit');
-    return;
-  }
-  
   state.currentLevel = level;
   const levelConfig = LEVELS[level];
   
@@ -389,8 +372,7 @@ function startSimulator(level){
   CONFIG.MISSION_TIME = levelConfig.missionTime;
   CONFIG.CHECKPOINT_COUNT = levelConfig.checkpointCount;
   
-  const checkpointTotal = document.getElementById('checkpoint-total');
-  if (checkpointTotal) checkpointTotal.innerText = CONFIG.CHECKPOINT_COUNT;
+  document.getElementById('checkpoint-total').innerText = CONFIG.CHECKPOINT_COUNT;
   
   const music = document.getElementById('bg-music');
   if (music) {
@@ -398,13 +380,9 @@ function startSimulator(level){
     music.play().catch(e => console.log('Автовоспроизведение музыки заблокировано:', e.message));
   }
   
-  const introPage = document.getElementById('intro-page');
-  if (introPage) introPage.classList.add('hidden');
-  
+  document.getElementById('intro-page').classList.add('hidden');
   setTimeout(() => {
-    const simPage = document.getElementById('simulator-page');
-    if (simPage) simPage.classList.add('active');
-    
+    document.getElementById('simulator-page').classList.add('active');
     if(!state.simulatorInitialized){ 
       initSimulator(); 
     } else {
@@ -503,19 +481,16 @@ function startMissionTimer(){
   if(state.timerInterval) clearInterval(state.timerInterval);
   state.timeLeft = CONFIG.MISSION_TIME;
   state.battery = 100;
-  
-  const timerUI = document.getElementById('timer-ui');
-  const batteryUI = document.getElementById('battery-ui');
-  if (timerUI) timerUI.innerText = state.timeLeft;
-  if (batteryUI) batteryUI.innerText = Math.round(state.battery);
+  document.getElementById('timer-ui').innerText = state.timeLeft;
+  document.getElementById('battery-ui').innerText = Math.round(state.battery);
 
   state.timerInterval = setInterval(() => {
     if(state.isCrashed || state.gameCompleted) return;
     state.timeLeft--;
-    if (timerUI) timerUI.innerText = state.timeLeft;
+    document.getElementById('timer-ui').innerText = state.timeLeft;
     const speedFactor = Math.abs(state.carSpeed) * 5;
     state.battery = Math.max(0, state.battery - (1 + speedFactor));
-    if (batteryUI) batteryUI.innerText = Math.round(state.battery);
+    document.getElementById('battery-ui').innerText = Math.round(state.battery);
 
     if(state.timeLeft <= 0){
       triggerFail("⏱️ ВРЕМЯ ВЫШЛО! Задание провалено.");
@@ -546,16 +521,10 @@ function showVictoryModal(){
     state.animationId = null;
   }
   
-  const victoryCheckpoints = document.getElementById('victoryCheckpoints');
-  const victoryTotal = document.getElementById('victoryTotal');
-  const victorySpeed = document.getElementById('victorySpeed');
-  const victoryModal = document.getElementById('victoryModal');
-  
-  if (victoryCheckpoints) victoryCheckpoints.innerText = state.checkpointsPassed;
-  if (victoryTotal) victoryTotal.innerText = CONFIG.CHECKPOINT_COUNT;
-  if (victorySpeed) victorySpeed.innerText = Math.round(state.maxSpeed * 200);
-  if (victoryModal) victoryModal.classList.add('show');
-  
+  document.getElementById('victoryCheckpoints').innerText = state.checkpointsPassed;
+  document.getElementById('victoryTotal').innerText = CONFIG.CHECKPOINT_COUNT;
+  document.getElementById('victorySpeed').innerText = Math.round(state.maxSpeed * 200);
+  document.getElementById('victoryModal').classList.add('show');
   SFX.victory();
   showNotification("✅ УРОК 2 ПРОЙДЕН! Отличная работа, оператор!", 'success');
 }
@@ -573,15 +542,11 @@ function returnToMenu(){
     music.currentTime = 0;
   }
   
-  const victoryModal = document.getElementById('victoryModal');
-  const simPage = document.getElementById('simulator-page');
-  const introPage = document.getElementById('intro-page');
-  
-  if (victoryModal) victoryModal.classList.remove('show');
-  if (simPage) simPage.classList.remove('active');
+  document.getElementById('victoryModal').classList.remove('show');
+  document.getElementById('simulator-page').classList.remove('active');
   
   setTimeout(() => {
-    if (introPage) introPage.classList.remove('hidden');
+    document.getElementById('intro-page').classList.remove('hidden');
     resetLevel();
   }, 500);
 }
@@ -595,15 +560,9 @@ function resetLevel(){
   state.maxSpeed = 0;
   state.carRotation = 0;
   state.animationId = null;
-  
-  const checkpointsEl = document.getElementById('checkpoints');
-  const checkpointCounter = document.getElementById('checkpoint-counter');
-  const speedEl = document.getElementById('speed');
-  
-  if (checkpointsEl) checkpointsEl.innerText = '0';
-  if (checkpointCounter) checkpointCounter.innerText = '0';
-  if (speedEl) speedEl.innerText = '0';
-  
+  document.getElementById('checkpoints').innerText = '0';
+  document.getElementById('checkpoint-counter').innerText = '0';
+  document.getElementById('speed').innerText = '0';
   if(carGroup){
     carGroup.position.set(0, CONFIG.GROUND_Y, 0);
     carGroup.rotation.y = 0;
@@ -613,8 +572,7 @@ function resetLevel(){
 }
 
 function fullGameRestart(){
-  const victoryModal = document.getElementById('victoryModal');
-  if (victoryModal) victoryModal.classList.remove('show');
+  document.getElementById('victoryModal').classList.remove('show');
   resetLevel();
   
   const music = document.getElementById('bg-music');
@@ -631,53 +589,56 @@ function fullGameRestart(){
 }
 
 function resetExercise(){
-  if(state.gameCompleted){ fullGameRestart(); return; }
+  if(state.gameCompleted){ 
+    fullGameRestart(); 
+    return; 
+  }
+  
+  // Сбрасываем состояние
   resetLevel();
+  
+  // Перезапускаем таймер
   startMissionTimer();
+  
+  // ВАЖНО: Перезапускаем анимацию, если она остановлена
+  if(!state.animationId){
+    animate();
+  }
+  
   showNotification("🔄 Упражнение перезапущено", 'success');
 }
 
 function initSimulator(){
   console.log('🛸 Инициализация тренажёра "Урок 2: Навигация"...');
-  
   if(typeof THREE === 'undefined'){
     console.error('❌ Three.js не загружен!');
-    const errorDiv = document.getElementById('webgl-error');
-    if (errorDiv) errorDiv.classList.add('show');
+    document.getElementById('webgl-error').classList.add('show');
     return;
   }
-  
   if(!checkWebGL()){
-    const errorDiv = document.getElementById('webgl-error');
-    if (errorDiv) errorDiv.classList.add('show');
+    document.getElementById('webgl-error').classList.add('show');
     return;
   }
-  
-  try {
-    setupScene();
-    setupLights();
-    setupFloor();
-    setupWalls();
-    setupObstacles();
-    setupCar();
-    setupCheckpoints();
-    setupEventListeners();
-    state.simulatorInitialized = true;
+  setupScene();
+  setupLights();
+  setupFloor();
+  setupWalls();
+  setupObstacles();
+  setupCar();
+  setupCheckpoints();
+  setupEventListeners();
+  state.simulatorInitialized = true;
 
-    setTimeout(() => {
-      if(!audioCtx || audioCtx.state === 'suspended'){
-        if(!audioHintShown){
-          showNotification("🎵 Нажмите на экран для активации звука", 'info');
-          audioHintShown = true;
-        }
+  setTimeout(() => {
+    if(!audioCtx || audioCtx.state === 'suspended'){
+      if(!audioHintShown){
+        showNotification("🎵 Нажмите на экран для активации звука", 'info');
+        audioHintShown = true;
       }
-    }, 1500);
-    animate();
-    console.log('✅ Тренажёр запущен. Оператор — к выполнению задачи!');
-  } catch (error) {
-    console.error('❌ Ошибка инициализации:', error);
-    showNotification('❌ Ошибка запуска тренажёра: ' + error.message, 'hit');
-  }
+    }
+  }, 1500);
+  animate();
+  console.log('✅ Тренажёр запущен. Оператор — к выполнению задачи!');
 }
 
 function checkWebGL(){
@@ -697,16 +658,13 @@ function setupScene(){
   camera.position.set(0, 5, -10);
   isLowEnd = (navigator.hardwareConcurrency || 4) < CONFIG.LOW_END_CORES;
   const pixelRatio = isLowEnd ? 1 : Math.min(window.devicePixelRatio, CONFIG.MAX_PIXEL_RATIO);
-  
   try{
     renderer = new THREE.WebGLRenderer({ antialias: !isLowEnd, alpha: true });
   } catch(e){
     console.error('❌ Не удалось создать WebGL рендерер:', e);
-    const errorDiv = document.getElementById('webgl-error');
-    if (errorDiv) errorDiv.classList.add('show');
+    document.getElementById('webgl-error').classList.add('show');
     throw e;
   }
-  
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(pixelRatio);
   renderer.setClearColor(0x050b1a, 0);
@@ -714,15 +672,12 @@ function setupScene(){
   if(!isLowEnd){ renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
-  
   const simPage = document.getElementById('simulator-page');
-  if (simPage) {
-    simPage.insertBefore(renderer.domElement, simPage.firstChild);
-    renderer.domElement.style.position = 'fixed';
-    renderer.domElement.style.top = '0';
-    renderer.domElement.style.left = '0';
-    renderer.domElement.style.zIndex = '1';
-  }
+  simPage.insertBefore(renderer.domElement, simPage.firstChild);
+  renderer.domElement.style.position = 'fixed';
+  renderer.domElement.style.top = '0';
+  renderer.domElement.style.left = '0';
+  renderer.domElement.style.zIndex = '1';
 }
 
 function setupLights(){
@@ -1072,9 +1027,8 @@ function applyCollision(){
 
 function triggerCollisionEffect(force){
   const flash = document.getElementById('collision-flash');
-  if (flash) flash.classList.add('active');
-  setTimeout(() => { if (flash) flash.classList.remove('active'); }, 150);
-  
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 150);
   if(force >= CONFIG.CRASH_FORCE_THRESHOLD && !state.isCrashed){
     state.isCrashed = true;
     state.carSpeed = 0;
@@ -1137,8 +1091,7 @@ function handleMovement(){
   if(now - state.lastUIUpdate > CONFIG.UI_UPDATE_INTERVAL){
     state.lastUIUpdate = now;
     const speedKmh = Math.round(Math.abs(state.carSpeed) * 200);
-    const speedEl = document.getElementById('speed');
-    if (speedEl) speedEl.innerText = speedKmh;
+    document.getElementById('speed').innerText = speedKmh;
   }
 
   if(Math.abs(state.carSpeed) > 0.05) SFX.engine();
@@ -1157,10 +1110,8 @@ function checkCheckpoints(){
     state.currentCheckpoint++;
     
     requestAnimationFrame(() => {
-      const checkpointsEl = document.getElementById('checkpoints');
-      const checkpointCounter = document.getElementById('checkpoint-counter');
-      if (checkpointsEl) checkpointsEl.innerText = state.checkpointsPassed;
-      if (checkpointCounter) checkpointCounter.innerText = state.checkpointsPassed;
+      document.getElementById('checkpoints').innerText = state.checkpointsPassed;
+      document.getElementById('checkpoint-counter').innerText = state.checkpointsPassed;
       showNotification(`🏁 ЧЕКПОИНТ ${state.checkpointsPassed}/${CONFIG.CHECKPOINT_COUNT}!`, 'success');
     });
 
@@ -1248,14 +1199,9 @@ function setupEventListeners(){
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
   window.addEventListener('resize', handleResize);
-  
-  const resetBtn = document.getElementById('resetCarBtn');
-  const restartBtn = document.getElementById('fullRestartBtn');
-  const menuBtn = document.getElementById('victoryMenuBtn');
-  
-  if (resetBtn) resetBtn.addEventListener('click', resetExercise);
-  if (restartBtn) restartBtn.addEventListener('click', fullGameRestart);
-  if (menuBtn) menuBtn.addEventListener('click', returnToMenu);
+  document.getElementById('resetCarBtn').addEventListener('click', resetExercise);
+  document.getElementById('fullRestartBtn').addEventListener('click', fullGameRestart);
+  document.getElementById('victoryMenuBtn').addEventListener('click', returnToMenu);
 }
 
 window.addEventListener('beforeunload', () => {
