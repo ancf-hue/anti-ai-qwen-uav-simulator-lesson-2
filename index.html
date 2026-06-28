@@ -226,7 +226,10 @@ body{ overflow: hidden; font-family:'Segoe UI','Orbitron', monospace; background
   <source src="avtomobil-theme.mp3" type="audio/mpeg">
 </audio>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- 🔧 ИСПРАВЛЕНИЕ: Загрузка Three.js с резервным CDN (jsdelivr + unpkg fallback) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" 
+        onerror="this.onerror=null; this.src='https://unpkg.com/three@0.128.0/build/three.min.js';"></script>
+
 <script>
 const LEVELS = {
   easy: {
@@ -355,9 +358,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyBtn = document.getElementById('copyPhoneBtn');
   if (copyBtn) copyBtn.addEventListener('click', copyPhone);
 
+  // 🔧 ИСПРАВЛЕНИЕ: Проверка загрузки Three.js перед стартом
   document.querySelectorAll('.level-card').forEach(card => {
     card.addEventListener('click', () => {
       const level = card.dataset.level;
+      
+      if (typeof THREE === 'undefined') {
+        alert('❌ Ошибка: 3D-библиотека Three.js не загрузилась.\n\nВозможные причины:\n• Нет интернет-соединения\n• Блокировщик рекламы (AdBlock, uBlock)\n• Сбой CDN\n\nПопробуйте:\n1. Обновить страницу (Ctrl+F5)\n2. Отключить блокировщик рекламы\n3. Использовать другой браузер');
+        return;
+      }
+      
       startSimulator(level);
     });
   });
@@ -594,13 +604,9 @@ function resetExercise(){
     return; 
   }
   
-  // Сбрасываем состояние
   resetLevel();
-  
-  // Перезапускаем таймер
   startMissionTimer();
   
-  // ВАЖНО: Перезапускаем анимацию, если она остановлена
   if(!state.animationId){
     animate();
   }
